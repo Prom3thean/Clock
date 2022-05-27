@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -23,9 +24,9 @@ public class Clock {
 	
 	// default values
 	private static final int DEFAULT_TIMER = 8;
-	private static final int UPDATE_INTERVAL = 1000;
+	private static final int UPDATE_INTERVAL = 10000;
 	private static final Path DIRECTORY_PATH = Path.of(System.getProperty("user.home") + "/Documents/Clock");
-	private static final String FILE_NAME = "clock.log";
+	private static final String FILE_NAME = "clock_" + LocalDate.now().getYear() +  ".log";
 	private static final String STRING_LINE_SEPERATOR = System.lineSeparator();
 	
 	// configuration
@@ -44,11 +45,11 @@ public class Clock {
 	
 	// utility values
 	private boolean nextDay = false;
+	private long currentOvertime = 0;
 	
 	//TODO sound
 	//TODO end
 	//TODO multithreading -> for I/O
-	//TODO split log every year
 	//TODO automatically calculate overtime at programm exit -> put into logs
 	//TODO read accumulated overtime from logs and inform user on programm start -> ask if and how much of it should be applied to timer
 	//TODO argument for log level
@@ -58,7 +59,7 @@ public class Clock {
 	
 	public static void main(String[] args) throws IOException {
 		Clock clock = new Clock();
-		String[] testArgs = {"-t",""};
+		String[] testArgs = {"adsdasdasdascxycxy"};
 		args = testArgs;
 		
 		// read config into clock
@@ -228,6 +229,7 @@ public class Clock {
 				currentLine = "Timer runs out at " + ending + " in " + formatTimeDifference(now, ending) + ".";
 			} else if(compareValue > 0) {
 				currentLine = "Timer already ran out at " + ending + ", " + formatTimeDifference(now, ending) + " ago.";
+				currentOvertime = ending.until(now, ChronoUnit.MINUTES);
 			} else {
 				currentLine = "Timer is over right now!";
 				nextDay = false;
@@ -250,6 +252,7 @@ public class Clock {
 			}
 		}
 		
+		//TODO add currentOvertime to sumOvertime
 		Logger.info("Exited Timer.");
 	}
 	
