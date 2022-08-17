@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
 import clock.Logger.Level;
 
 /**
- * <p>This class is the main class for configuration, management of resources and starting a timer specified by console input.</p>
+ * <p>This class is the main class for configuration, management of resources and starting the timer specified by console input.</p>
  * 
  * @author Thomas Meier
  *
@@ -25,7 +25,7 @@ public class Clock {
 	// default values
 	private static final int DEFAULT_TIMER = 8;
 	private static final int UPDATE_INTERVAL = 10000;
-	private static final Path DIRECTORY_PATH = Path.of(System.getProperty("user.home") + "/Documents/Clock");
+	private static final Path DIRECTORY_PATH = Path.of(System.getProperty("user.home") + "/Documents/Clock"); //TODO make it platform independent
 	private static final String FILE_NAME = "clock_" + LocalDate.now().getYear() +  ".log";
 	private static final String STRING_LINE_SEPERATOR = System.lineSeparator();
 	
@@ -49,17 +49,17 @@ public class Clock {
 	
 	//TODO sound
 	//TODO end
-	//TODO multithreading -> for I/O
-	//TODO automatically calculate overtime at programm exit -> put into logs
-	//TODO read accumulated overtime from logs and inform user on programm start -> ask if and how much of it should be applied to timer
+	//TODO multi-threading -> for I/O
+	//TODO automatically calculate overtime at program exit -> put into logs
+	//TODO read accumulated overtime from logs and inform user on program start -> ask if and how much of it should be applied to timer
 	//TODO argument for log level
 	//TODO warning for max log-size (with overwrite option? -> old entries overwritten?)
-	//TODO logentries for timer reached milestones (every hour or so)
-	//TODO smartflush -> dont flush on every writeEntry instead at certain intervals (like time or events)
+	//TODO log-entries for timer reached milestones (every hour or so)
+	//TODO smartflush -> don't flush on every writeEntry instead at certain intervals (like time or events)
 	
 	public static void main(String[] args) throws IOException {
 		Clock clock = new Clock();
-		String[] testArgs = {"adsdasdasdascxycxy"};
+		String[] testArgs = {};
 		args = testArgs;
 		
 		// read config into clock
@@ -126,7 +126,7 @@ public class Clock {
 							System.out.println("No time found after the argument!" + STRING_LINE_SEPERATOR + " Usage: -f|--freetime <time>");
 						}
 					} break;
-					//TODO this here can be the point of change for configration of log level
+					//TODO this here can be the point of change for configuration of log level
 					case "-l","--nolog": {
 						log = false;
 						Logger.setLevel(Level.NONE);
@@ -159,8 +159,8 @@ public class Clock {
 	}
 	
 	/**
-	 * Applies the current configuration parameters to the clock (like creating a logger/logfile for {@code log=true}). 
-	 * Returns a boolean to signal if the programm should quit prematurely.
+	 * Applies the current configuration parameters to the clock (like creating a logger/log-file for {@code log=true}). 
+	 * Returns a boolean to signal if the program should quit prematurely.
 	 * 
 	 * @return {@code true} if the process should quit prematurely; {@code false} otherwise 
 	 * @throws IOException if console-reading failed
@@ -261,9 +261,9 @@ public class Clock {
 	// Utility functions
 	
 	/**
-	 * Deletes old logfile and creates an empty new one.
+	 * Deletes old log-file and creates an empty new one.
 	 * 
-	 * @return true if process finished succesfully; false if any problems arise
+	 * @return true if process finished successfully; false if any problems arise
 	 * @throws IOException if any IOExceptions occur with the file
 	 */
 	private boolean clearlog() throws IOException {
@@ -280,19 +280,30 @@ public class Clock {
 			System.out.println("Failed!");
 			return false;
 		} else {
-			System.out.println("Successfull!");
+			System.out.println("Successful!");
 		}
 		
 		System.out.print("Creating new empty logfile at \"" + logfile.getAbsolutePath() + "\"... ");
 		if(!logfile.createNewFile()) {
 			System.out.print("File already exists. This should not be possible!");
 		} else {
-			System.out.print("Succesfull!");
+			System.out.print("Successful!");
 		}
 		
 		return true;
 	}
 	
+	/**
+	 * Calculates the difference between two {@link LocalTime}-objects with minute-precision. Returns a
+	 * String with the calculated differences that has one of the following forms:</br>
+	 * <ul>
+	 * 	<li>xd</li>
+	 * </ul>
+	 * 
+	 * @param before
+	 * @param reference
+	 * @return
+	 */
 	private String formatTimeDifference(LocalTime before, LocalTime reference) {
 		int mvb = before.getHour() * 60 + before.getMinute(); // minute value for before
 		int mvr = reference.getHour() * 60 + reference.getMinute(); // minute value for reference
@@ -328,7 +339,7 @@ public class Clock {
 	}
 	
 	/**
-	 * Creates a new logfile at the given FILE_PATH constant and initiates the logger to log into that file with log-level INFO.
+	 * Creates a new log-file at the given FILE_PATH constant and initiates the logger to log into that file with log-level INFO.
 	 * 
 	 * @return {@code true} if the file does not exist and was successfully created; {@code false} if the file already exists
 	 * @throws IOException if an I/O-Exception occurs while creating
@@ -344,6 +355,13 @@ public class Clock {
 		return isNew;	
 	}
 	
+	/**
+	 * Maps a string like "yes", "yeah" or "no" to the corresponding boolean value. Any other value than
+	 * positives are mapped to {@code false}.
+	 * 
+	 * @param string {@code String} containing a keyword that can be mapped to a boolean value
+	 * @return {@code true} if string is "y","yes","yep","yea" or "yeah"; {@code false} otherwise
+	 */
 	private boolean mapStringBoolean(String string) {
 		if(string == null) {
 			return false;
@@ -356,6 +374,9 @@ public class Clock {
 	}
 	
 	//TODO update this to current arguments
+	/**
+	 * Prints the current configuration parameters of the application that are relevant for the user.
+	 */
 	private void printConfiguration() {
 		System.out.println("Starting timer with configuration:" + STRING_LINE_SEPERATOR
 				+ "----------------------------------" + STRING_LINE_SEPERATOR
@@ -371,10 +392,18 @@ public class Clock {
 				+ "file path = " + DIRECTORY_PATH);
 	}
 	
+	/**
+	 * Prints the help-text with a short introduction for the application.
+	 */
 	private void printHelp() {
 		printHelp(false);
 	}
 	
+	/**
+	 * Prints the help-text for the application.
+	 * 
+	 * @param skipIntro {@code Boolean} decides if a short introduction should be printed
+	 */
 	private void printHelp(boolean skipIntro) {
 		if(!skipIntro) {
 			System.out.println("This java file is used for creating remindal timers with 8-hour intervals. It can create" + STRING_LINE_SEPERATOR
