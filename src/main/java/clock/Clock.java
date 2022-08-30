@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
@@ -23,11 +24,11 @@ import clock.Logger.Level;
 public class Clock {
 	
 	// default values
-	private static final int DEFAULT_TIMER = 8;
-	private static final int UPDATE_INTERVAL = 10000;
-	private static final Path DIRECTORY_PATH = Path.of(System.getProperty("user.home") + "/Documents/Clock"); //TODO make it platform independent
-	private static final String FILE_NAME = "clock_" + LocalDate.now().getYear() +  ".log";
-	private static final String STRING_LINE_SEPERATOR = System.lineSeparator();
+	private final int DEFAULT_TIMER = 8;
+	private final int UPDATE_INTERVAL = 10000;
+	private final Path DIRECTORY_PATH = Path.of(System.getProperty("user.home") + "/Documents/Clock"); //TODO make it platform independent
+	private final String FILE_NAME = "clock_" + LocalDate.now().getYear() +  ".log";
+	private final String STRING_LINE_SEPERATOR = System.lineSeparator();
 	
 	// configuration
 	private boolean verbose = false;
@@ -39,6 +40,7 @@ public class Clock {
 	
 	// input parameters
 	private LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+	//TODO use durations for this
 	private LocalTime breaktime = LocalTime.of(0, 45);
 	private LocalTime overtime = LocalTime.of(0, 0);
 	private LocalTime freetime = LocalTime.of(0, 0);
@@ -59,8 +61,8 @@ public class Clock {
 	
 	public static void main(String[] args) throws IOException {
 		Clock clock = new Clock();
-		String[] testArgs = {};
-		args = testArgs;
+//		String[] testArgs = {"-t","8:27"};
+//		args = testArgs;
 		
 		// read config into clock
 		clock.parseArgs(args);
@@ -77,6 +79,7 @@ public class Clock {
 		
 		// start timer with given configuration
 		clock.startTimer();
+		Duration d = Duration.ofDays(1);
 	}
 	
 	

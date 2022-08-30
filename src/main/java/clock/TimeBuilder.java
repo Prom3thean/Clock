@@ -67,7 +67,7 @@ public class TimeBuilder {
 	}
 	
 	/**
-	 * Fully builds the time in this builder. If any fields were left blanc they are set to 0.
+	 * Fully builds the time in this builder. If any fields were left blank they are set to 0.
 	 * 
 	 * @return time built
 	 */

@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class Logger {
 	private static Level level;
 	private static File logfile;
-	private static boolean smartflush = false;
+	private static boolean smartflush = false; //TODO: this should serve an actual purpose
 	
 	private static final String whitespaces = "                             ";
 	private static final Level maxStringLength = Level.WARNING;	
