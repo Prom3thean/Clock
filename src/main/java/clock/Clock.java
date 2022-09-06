@@ -27,7 +27,7 @@ public class Clock {
 	private final int DEFAULT_TIMER = 8;
 	private final int UPDATE_INTERVAL = 10000;
 	private final Path DIRECTORY_PATH = Path.of(System.getProperty("user.home") + "/Documents/Clock"); //TODO make it platform independent
-	private final String FILE_NAME = "clock_" + LocalDate.now().getYear() +  ".log";
+	private final String LOGFILE_NAME = "clock_" + LocalDate.now().getYear() +  ".log";
 	private final String STRING_LINE_SEPERATOR = System.lineSeparator();
 	
 	// configuration
@@ -49,6 +49,8 @@ public class Clock {
 	private boolean nextDay = false;
 	private long currentOvertime = 0;
 	
+	//TODO logic for newline if there is trailing print -> own impl of syso with bool-flag
+	//TODO outsource config to it's own object (singleton)?
 	//TODO sound
 	//TODO end
 	//TODO multi-threading -> for I/O
@@ -270,7 +272,7 @@ public class Clock {
 	 * @throws IOException if any IOExceptions occur with the file
 	 */
 	private boolean clearlog() throws IOException {
-		File logfile = new File(DIRECTORY_PATH.toString() + "/" + FILE_NAME);
+		File logfile = new File(DIRECTORY_PATH.toString() + "/" + LOGFILE_NAME);
 		Logger.close();
 		System.out.print("Deleting logfile at \"" + logfile.getAbsolutePath() + "\"... ");
 
@@ -348,7 +350,7 @@ public class Clock {
 	 * @throws IOException if an I/O-Exception occurs while creating
 	 */
 	private boolean createLogfileAndInitiateLogger() throws IOException {
-		File logfile = new File(DIRECTORY_PATH.toString() + "/" + FILE_NAME);
+		File logfile = new File(DIRECTORY_PATH.toString() + "/" + LOGFILE_NAME);
 		Files.createDirectories(DIRECTORY_PATH);
 		
 		boolean isNew = logfile.createNewFile();

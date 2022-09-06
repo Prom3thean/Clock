@@ -4,6 +4,9 @@ import java.time.LocalTime;
 
 public class LocalTimeParser {
 	public static LocalTime fromString(String toParse) {
+		if(toParse == null) {
+			throw new IllegalArgumentException("String to parse cannot be null.");
+		}
 		if(toParse.length() > 5) {
 			throw new IllegalArgumentException("String to parse cannot be longer than 5 characters but is " + toParse.length() + " characters long.");
 		}

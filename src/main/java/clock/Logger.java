@@ -38,6 +38,7 @@ public class Logger {
 		writeNonErrorEntry(Level.WARNING, message);	
 	}
 	
+	//TODO this can be unified with writeNonError entry -> method with lvl and string param
 	static void error(Exception e) {
 		if(logfile == null || level == null) {
 			System.out.println("Warning! Logging attempt while Logger is not initialized!");
