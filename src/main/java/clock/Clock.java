@@ -63,7 +63,7 @@ public class Clock {
 	
 	public static void main(String[] args) throws IOException {
 		Clock clock = new Clock();
-//		String[] testArgs = {"-t","8:27"};
+//		String[] testArgs = {"-f","8:20"};
 //		args = testArgs;
 		
 		// read config into clock
@@ -81,7 +81,6 @@ public class Clock {
 		
 		// start timer with given configuration
 		clock.startTimer();
-		Duration d = Duration.ofDays(1);
 	}
 	
 	
@@ -222,7 +221,7 @@ public class Clock {
 			nextDay = true;
 		}
 		
-		Logger.info("Started Timer for configuration " + toString() + ".");
+		Logger.info("Started Timer for " + toString() + ".");
 		Logger.info("Timer runs out at " + ending + " in " + formatTimeDifference(LocalTime.now(), ending) + ".");
 					
 		//TODO there are better solutions for overwriting the old line
@@ -233,7 +232,7 @@ public class Clock {
 			if(compareValue < 0 || nextDay) {
 				currentLine = "Timer runs out at " + ending + " in " + formatTimeDifference(now, ending) + ".";
 			} else if(compareValue > 0) {
-				currentLine = "Timer already ran out at " + ending + ", " + formatTimeDifference(now, ending) + " ago.";
+				currentLine = "Timer already ran out at " + ending + ", " + formatTimeDifference(ending, now) + " ago.";
 				currentOvertime = ending.until(now, ChronoUnit.MINUTES);
 			} else {
 				currentLine = "Timer is over right now!";
@@ -302,12 +301,15 @@ public class Clock {
 	 * Calculates the difference between two {@link LocalTime}-objects with minute-precision. Returns a
 	 * String with the calculated differences that has one of the following forms:</br>
 	 * <ul>
-	 * 	<li>xd</li>
+	 * 	<li>hh "hours" mm "minutes"</li>
+	 *  <li>h "hour" mm "minutes"</li>
+	 *  <li>hh "hours" m "minute"</li>
+	 *  <li>h "hour" m "minute"</li>
 	 * </ul>
 	 * 
-	 * @param before
-	 * @param reference
-	 * @return
+	 * @param before - the point in time from which to build the difference from
+	 * @param reference - the point in time to build the difference to
+	 * @return {@code String} that tells the difference between {@code before} and {@code reference}
 	 */
 	private String formatTimeDifference(LocalTime before, LocalTime reference) {
 		int mvb = before.getHour() * 60 + before.getMinute(); // minute value for before
@@ -323,7 +325,7 @@ public class Clock {
 		int minutes = difference % 60;
 		
 		
-		return  (hours > 0 ? hours > 1 ? hours + " hours" : hours + " hour" : " ") + (hours > 0 && minutes > 0 ? " " : "") +
+		return  (hours > 0 ? hours > 1 ? hours + " hours" : hours + " hour" : "") + ((hours > 0 && minutes > 0) ? " " : "") +
 				(minutes > 0 ? minutes > 1 ? minutes + " minutes" : minutes + " minute" : "");
 	}
 
@@ -338,7 +340,7 @@ public class Clock {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
 	        	Logger.warning("Process was killed irregularly!");
-	            System.out.println("Process was killed irregularly!");
+	            System.out.println(STRING_LINE_SEPERATOR + "Process was killed irregularly!");
 	        }
 	    }, "Shutdown-Thread"));
 	}
@@ -365,13 +367,12 @@ public class Clock {
 	 * positives are mapped to {@code false}.
 	 * 
 	 * @param string {@code String} containing a keyword that can be mapped to a boolean value
-	 * @return {@code true} if string is "y","yes","yep","yea" or "yeah"; {@code false} otherwise
+	 * @return {@code true} if String is "y","yes","yep","yea" or "yeah"; {@code false} otherwise
 	 */
 	private boolean mapStringBoolean(String string) {
 		if(string == null) {
 			return false;
 		}
-		
 		switch(string.toLowerCase()){
 			case "y","yes","yep","yeah","yea": return true;
 			default: return false;
