@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
@@ -49,6 +48,8 @@ public class Clock {
 	private boolean nextDay = false;
 	private long currentOvertime = 0;
 	
+	//TODO make regular shutdown available (key-comb, eg. q + enter)
+	//TODO shutdown-hook logic -> only log if irregular shutdown
 	//TODO logic for newline if there is trailing print -> own impl of syso with bool-flag
 	//TODO outsource config to it's own object (singleton)?
 	//TODO sound
