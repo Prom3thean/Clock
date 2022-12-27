@@ -48,6 +48,7 @@ public class Clock {
 	private boolean nextDay = false;
 	private long currentOvertime = 0;
 	
+	//TODO make timer-interval configurable (currently only 8h; max 24h)
 	//TODO make regular shutdown available (key-comb, eg. q + enter)
 	//TODO shutdown-hook logic -> only log if irregular shutdown
 	//TODO logic for newline if there is trailing print -> own impl of syso with bool-flag
@@ -63,6 +64,7 @@ public class Clock {
 	//TODO smartflush -> don't flush on every writeEntry instead at certain intervals (like time or events)
 	
 	public static void main(String[] args) throws IOException {
+		
 		Clock clock = new Clock();
 //		String[] testArgs = {"-f","8:20"};
 //		args = testArgs;
@@ -213,57 +215,86 @@ public class Clock {
 	 * Starts the timer with console-output for the current clock-configuration.
 	 */
 	private void startTimer() {
-		String emptyLine = "\r                                                                                                   \r";
+
 		String currentLine = "";
+		int currentLength = 0;
+		String appendix = "";
+		int currentAppendixLength = 0;
 		LocalTime ending = calculateTimer();
 
-		if(ending.isBefore(time)) {
+		if (ending.isBefore(time)) {
 			Logger.info("Ending time is at the next day.");
 			nextDay = true;
 		}
-		
+
 		Logger.info("Started Timer for " + toString() + ".");
 		Logger.info("Timer runs out at " + ending + " in " + formatTimeDifference(LocalTime.now(), ending) + ".");
-					
-		//TODO there are better solutions for overwriting the old line
-		while(!end) {
-			LocalTime now = LocalTime.now();
-			int compareValue = now.truncatedTo(ChronoUnit.MINUTES).compareTo(ending);
-			System.out.print(emptyLine);
-			if(compareValue < 0 || nextDay) {
-				currentLine = "Timer runs out at " + ending + " in " + formatTimeDifference(now, ending) + ".";
-			} else if(compareValue > 0) {
-				currentLine = "Timer already ran out at " + ending + ", " + formatTimeDifference(ending, now) + " ago.";
-				currentOvertime = ending.until(now, ChronoUnit.MINUTES);
-			} else {
-				currentLine = "Timer is over right now!";
-				nextDay = false;
-			}
-			System.out.print(currentLine);
+
+		// TODO there are better solutions for overwriting the old line
+		while (!end) {
 			try {
-				if(verbose) {
-					for (int i = 0; i < UPDATE_INTERVAL / 1000; i++) {
-						System.out.print(emptyLine + currentLine + " Sleeping for " + (UPDATE_INTERVAL / 1000 - i) + " seconds.");
-						Thread.sleep(1000);
-					}
+				LocalTime now = LocalTime.now();
+				int compareValue = now.truncatedTo(ChronoUnit.MINUTES).compareTo(ending);
+
+				//TODO extract currentLine + currentLength into object -> LengthHistorianString
+				if (compareValue < 0 || nextDay) {
+					currentLine = "Timer runs out at " + ending + " in " + formatTimeDifference(now, ending) + ".";
+					currentLength = currentLine.length();
+				} else if (compareValue > 0) {
+					currentLine = "Timer already ran out at " + ending + ", " + formatTimeDifference(ending, now)
+							+ " ago.";
+					currentLength = currentLine.length();
+					currentOvertime = ending.until(now, ChronoUnit.MINUTES);
 				} else {
-					Thread.sleep(UPDATE_INTERVAL);
+					currentLine = "Timer is over right now!";
+					currentLength = currentLine.length();
+					nextDay = false;
 				}
-			} catch (InterruptedException e) {
+				
+				try {
+					if (verbose) {
+						for (int i = 0; i < UPDATE_INTERVAL / 1000; i++) {
+							currentAppendixLength = appendix.length();
+							appendix = " Sleeping for approx. " + (UPDATE_INTERVAL / 1000 - i) + " seconds.";
+																					
+							System.out.write(renderLineReplace(currentLength + currentAppendixLength, currentLine + appendix).getBytes());
+							Thread.sleep(1000);
+						}
+					} else {			
+						System.out.write(renderLineReplace(currentLength, currentLine).getBytes());
+						Thread.sleep(UPDATE_INTERVAL);
+					}
+				} catch (InterruptedException e) {
+					Logger.error(e);
+					if (verbose) {
+						System.out.println("Thread was interrupted while sleeping!");
+					}
+				}
+			} catch (IOException e) {
 				Logger.error(e);
-				if(verbose) {
-					System.out.println("Thread was interrupted while sleeping!");
+				if (verbose) {
+					System.out.println("Recieved IOException while writing bytes to output!");
 				}
 			}
 		}
-		
-		//TODO add currentOvertime to sumOvertime
+
+		// TODO add currentOvertime to sumOvertime
 		Logger.info("Exited Timer.");
 	}
 	
-	
-	
 	// Utility functions
+	
+	/**
+	 * Renders a string that is used to replace a not-ended line with length {@code oldLength} with {@code newLine}.
+	 * 
+	 * @param oldLength Length of the line to be replaced.
+	 * @param newLine String to replace the old line.
+	 * 
+	 * @return {@code String} to replace the old line using carriage returns and spaces.
+	 */
+	private String renderLineReplace(int oldLength, String newLine) {
+		return "\r" + " ".repeat(oldLength) + "\r" + newLine;
+	}
 	
 	/**
 	 * Deletes old log-file and creates an empty new one.
